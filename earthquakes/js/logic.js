@@ -1,17 +1,60 @@
-const myMap = L.map("map", {
-    center: [0, 0],
-    zoom: 2
+const lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
+    tileSize: 512,
+    maxZoom: 18,
+    zoomOffset: -1,
+    id: "mapbox/light-v10",
+    accessToken: API_KEY
 });
-  
-L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+
+const darkmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
     tileSize: 512,
     maxZoom: 18,
     zoomOffset: -1,
     id: "mapbox/dark-v10",
     accessToken: API_KEY
-}).addTo(myMap);
+});
   
+const layers = {
+    Earthquakes: new L.LayerGroup(),
+    Tectonic_Plates: new L.LayerGroup()
+};
+
+const myMap = L.map("map", {
+    center: [0, 0],
+    zoom: 2,
+    layers: [
+        layers.Earthquakes,
+        layers.Tectonic_Plates
+    ]
+});
+
+darkmap.addTo(myMap);
+
+const maps = {
+    'Light': lightmap,
+    'Dark': darkmap
+};
+
+const overlays = {
+    'Earthquakes': layers.Earthquakes,
+    'Tectonic Plates': layers.Tectonic_Plates
+};
+
+L.control.layers(maps, overlays).addTo(myMap);
+
+const info = L.control({
+    position: 'topright'
+});
+
+info.onAdd = function() {
+    const div = L.DomUtil.create('div', 'legend');
+    return div;
+};
+
+info.addTo(myMap);
+
 function markerSize(magnitude) {
     return (magnitude * magnitude * 20000)
 }
@@ -37,17 +80,17 @@ const m45 = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.
 
 d3.json(m45).then(data => {
     const quakes = data.features;
-    const maxa = [];
     for (let i = 0; i < quakes.length; i++) {
         let latlng = [quakes[i].geometry.coordinates[1], quakes[i].geometry.coordinates[0]]
         console.log(latlng)
-        L.circle(latlng, {
+        const newCircle = L.circle(latlng, {
             fillOpacity: 1,
             color: 'white',
             weight: 0.5,
             fillColor: eqColor(quakes[i].geometry.coordinates[2]),
             radius: markerSize(quakes[i].properties.mag)
-        }).bindPopup(quakes[i].properties.title + '<br>' + `Depth: ${quakes[i].geometry.coordinates[2]}`).addTo(myMap); 
+        });
+        newCircle.addTo(layers.Earthquakes);
+        newCircle.bindPopup(quakes[i].properties.title + '<br>' + `Depth: ${quakes[i].geometry.coordinates[2]}`); 
     }
-  
 });

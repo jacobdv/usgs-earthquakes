@@ -75,6 +75,35 @@ function eqColor(depth) {
     }
 };
 
+function getLegendColor(d) {
+    return d = 100 ? 'maroon' :
+           d = 88.5  ? 'firebrick' :
+           d = 75  ? 'indianred' :
+           d = 62.5  ? 'burlywood' :
+           d = 50   ? 'khaki' :
+           d = 37.5   ? 'palegreen' :
+           d = 25   ? 'springgreen' :
+           d = 12.5   ? 'mediumseagreen' :
+           d = 0   ? 'seagreen' :
+                      'white';
+} 
+
+// Legend
+const legend = L.control({
+    position: 'bottomright'
+});
+
+legend.onAdd = function (map) {
+    const legendDiv = L.DomUtil.create('div','info-legend'),
+    numbers = [0, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100],
+    labels = [];
+    for (let i = 0; i < numbers.length; i++) {
+        div.innerHTML +=
+            '<i style = "background:' + getLegendColor(numbers[i] + 1) + '"></i>' +
+            numbers[i] + (numbers[i + 1] ? '&ndash;' + numbers[i + 1] + '<br>' : '+');
+    }
+}
+
 // All earthquakes in the last week.
 const m45 = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson';
 
@@ -93,4 +122,5 @@ d3.json(m45).then(data => {
         newCircle.addTo(layers.Earthquakes);
         newCircle.bindPopup(quakes[i].properties.title + '<br>' + `Depth: ${quakes[i].geometry.coordinates[2]}`); 
     }
+    updateLegend()
 });

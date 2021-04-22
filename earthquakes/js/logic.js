@@ -128,15 +128,15 @@ Promise.all([d3.json(m45), d3.json(tectonic)]).then(([data, tectonic]) => {
     // Adding polygon for each plate.
     for (let i = 0; i < tectonicPlates.length; i++) {
         const coords = tectonicPlates[i].geometry.coordinates[0];
-        console.log(coords)
+        // Reformats coordinate pair ordering into new array.
         const plate = [];
         coords.forEach(latlng => {
             let lat = latlng[1];
             let lng = latlng[0];
             let formattedCoords = [lat, lng];
             plate.push(formattedCoords)
-            console.log(formattedCoords);
         })
+        // Creates new plates.
         const newPlate = L.polygon(plate, {
             color: 'gold',
             fillOpacity: 0,
@@ -146,7 +146,7 @@ Promise.all([d3.json(m45), d3.json(tectonic)]).then(([data, tectonic]) => {
         newPlate.addTo(layers.Tectonic_Plates);
         newPlate.bindPopup(tectonicPlates[i].properties.PlateName);
     }
-    
+
     // Earthquake data visualizations.
     // Beginning parsing through the data.
     const quakes = data.features;

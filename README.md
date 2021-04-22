@@ -1,1 +1,1 @@
-# usgs-earthquakes
+# USGS: Earthquake Visualization

@@ -76,16 +76,19 @@ function eqColor(depth) {
 };
 
 function getLegendColor(d) {
-    return d = 100 ? 'maroon' :
-           d = 88.5  ? 'firebrick' :
-           d = 75  ? 'indianred' :
-           d = 62.5  ? 'burlywood' :
-           d = 50   ? 'khaki' :
-           d = 37.5   ? 'palegreen' :
-           d = 25   ? 'springgreen' :
-           d = 12.5   ? 'mediumseagreen' :
-           d = 0   ? 'seagreen' :
-                      'white';
+    switch (d) {
+        case d = 100 : return ('maroon');
+        case d = 87.5 : return ('firebrick');
+        case d = 75 : return ('indianred');
+        case d = 62.5 : return ('burlywood');
+        case d = 50 : return ('khaki');
+        case d = 37.5 : return ('palegreen');
+        case d = 25 : return ('springgreen');
+        case d = 12.5 : return ('mediumseagreen');
+        case d = 0 : return ('seagreen');
+        // Default would indicate an above ground earthquake.
+        default : return ('white');
+    }
 } 
 
 // Legend
@@ -94,15 +97,18 @@ const legend = L.control({
 });
 
 legend.onAdd = function (map) {
-    const legendDiv = L.DomUtil.create('div','info-legend'),
-    numbers = [0, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100],
-    labels = [];
+    let legendDiv = L.DomUtil.create('div','info legend'),
+    numbers = [0, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100];
     for (let i = 0; i < numbers.length; i++) {
-        div.innerHTML +=
-            '<i style = "background:' + getLegendColor(numbers[i] + 1) + '"></i>' +
+        legendDiv.innerHTML +=
+            '<i style = "background:' + getLegendColor(numbers[i]) + '"></i>' +
             numbers[i] + (numbers[i + 1] ? '&ndash;' + numbers[i + 1] + '<br>' : '+');
+        console.log(numbers[i])
     }
-}
+    return legendDiv;
+};
+
+legend.addTo(myMap);
 
 // All earthquakes in the last week.
 const m45 = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson';
@@ -111,7 +117,7 @@ d3.json(m45).then(data => {
     const quakes = data.features;
     for (let i = 0; i < quakes.length; i++) {
         let latlng = [quakes[i].geometry.coordinates[1], quakes[i].geometry.coordinates[0]]
-        console.log(latlng)
+        // console.log(latlng)
         const newCircle = L.circle(latlng, {
             fillOpacity: 1,
             color: 'white',
@@ -122,5 +128,4 @@ d3.json(m45).then(data => {
         newCircle.addTo(layers.Earthquakes);
         newCircle.bindPopup(quakes[i].properties.title + '<br>' + `Depth: ${quakes[i].geometry.coordinates[2]}`); 
     }
-    updateLegend()
 });
